@@ -183,4 +183,8 @@ contract EthPool is Ownable {
 
         return true;
     }
+
+    function totalAccounts() external view returns (uint256) {
+        return s_accounts.length;
+    }
 }
