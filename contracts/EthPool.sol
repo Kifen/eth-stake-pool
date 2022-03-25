@@ -143,7 +143,7 @@ contract EthPool is Ownable {
     }
 
     function getAccount(address _account)
-        public
+        external
         view
         returns (Account memory account)
     {
