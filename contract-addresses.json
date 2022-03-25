@@ -1,5 +1,5 @@
 {
-    "1": {
-        "EthPool": "0x76Cf9b56b35c251492cF642609DB8d5Af5057ae6"
+    "rinkeby": {
+        "EthPool": "0xBc70c3039152dD83d2d4517996c0D7f2A74d70d8"
     }
 }

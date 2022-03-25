@@ -319,8 +319,6 @@ describe("EthPool", () => {
 
         let totalRewardsAfterBobWithdrawal = await ethPool.s_totalRewards();
 
-        // expect(totalRewardsAfterBobWithdrawal).to.equal(0);
-
         const aliceETHBalanceAfterWithdrawal = await provider?.getBalance(
           aliceAddress
         );
@@ -337,8 +335,6 @@ describe("EthPool", () => {
         expect(
           bobETHBalanceBeforeWithdrawal?.add(bobAmountBN).add(bobReward)
         ).to.be.gte(bobETHBalanceAfterWithdrawal);
-
-        // expect(await provider?.getBalance(ethPool.address)).to.equal(0);
       });
 
       it("should fail if account has no deposits", async () => {

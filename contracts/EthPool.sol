@@ -28,6 +28,7 @@ contract EthPool is Ownable {
     event DepositETH(address account, uint256 amount);
     event DepositReward(uint256 amount, uint256 accounts);
     event Withdraw(address account, uint256 deposit, uint256 reward);
+    event Received(address sender, uint256 amount);
 
     modifier ethSent() {
         require(msg.value > 0, "EthPool: no value sent");
@@ -151,11 +152,15 @@ contract EthPool is Ownable {
             return account;
         }
 
-        (account,) = _getAccount(_account);
+        (account, ) = _getAccount(_account);
     }
 
-    function _getAccount(address _account) internal view returns (Account memory account, int256 index) {
-       uint256 accountIndex = s_indexOf[_account].index;
+    function _getAccount(address _account)
+        internal
+        view
+        returns (Account memory account, int256 index)
+    {
+        uint256 accountIndex = s_indexOf[_account].index;
         account = s_accounts[accountIndex];
         index = int256(accountIndex);
     }
@@ -171,5 +176,9 @@ contract EthPool is Ownable {
 
     function totalAccounts() external view returns (uint256) {
         return s_accounts.length;
+    }
+
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
     }
 }

@@ -3,8 +3,8 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
-import { ethers } from "hardhat";
-import { saveContractAddress } from './utils'
+import { ethers, network } from "hardhat";
+import { saveContractAddress } from "./utils";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -22,10 +22,7 @@ async function main() {
 
   console.log("EthPool deployed to:", ethPool.address);
 
-  const network = await ethers.getDefaultProvider().getNetwork();
-
-  saveContractAddress(network.chainId, "EthPool", ethPool.address);
-
+  saveContractAddress(network.name, "EthPool", ethPool.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

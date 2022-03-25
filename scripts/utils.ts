@@ -15,7 +15,11 @@ function getSavedContractAddresses() {
   return addrs;
 }
 
-export const saveContractAddress = (network: number, contract: string, address: string) => {
+export const saveContractAddress = (
+  network: string,
+  contract: string,
+  address: string
+) => {
   const addrs = getSavedContractAddresses();
   addrs[network] = addrs[network] || {};
   addrs[network][contract] = address;
@@ -24,4 +28,4 @@ export const saveContractAddress = (network: number, contract: string, address: 
     path.join(__dirname, `../${addressFile}`),
     JSON.stringify(addrs, null, "    ")
   );
-}
+};
