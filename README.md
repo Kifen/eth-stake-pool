@@ -12,6 +12,14 @@ $ cd eth-stake-pool
 $ npm install
 ```
 
+Create file `.env` using below [template](https://github.com/Kifen/eth-stake-pool/blob/main/.env.example):
+
+```
+PRIVATE_KEY= 
+RINKEBY_URL=
+ETHERSCAN_API_KEY=
+```
+
 To run test, `npm run test`
 
 ### Query
