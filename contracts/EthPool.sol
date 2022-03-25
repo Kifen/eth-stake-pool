@@ -17,6 +17,7 @@ contract EthPool is Ownable {
 
     uint256 public s_accounstCount = 0;
     uint256 public s_totalEthDeposited;
+    uint256 public s_totalRewards;
 
     // array of all accounts
     Account[] private s_accounts;
@@ -57,19 +58,14 @@ contract EthPool is Ownable {
         emit DepositETH(msg.sender, msg.value);
     }
 
-    function depositReward(uint256 _rewards)
-        external
-        payable
-        ethSent
-        onlyOwner
-    {
+    function depositReward() external payable ethSent onlyOwner {
         Account[] memory accounts = s_accounts;
 
         Account memory account;
         for (uint256 i = 0; i < accounts.length; i++) {
             account = accounts[i];
             uint256 accountReward = _getAccountReward(
-                _rewards,
+                msg.value,
                 account.deposits
             );
 
@@ -77,7 +73,8 @@ contract EthPool is Ownable {
             s_accounts[i] = account;
         }
 
-        emit DepositReward(_rewards, accounts.length);
+        s_totalRewards += msg.value;
+        emit DepositReward(msg.value, accounts.length);
     }
 
     /**
@@ -85,19 +82,20 @@ contract EthPool is Ownable {
      */
     function withdraw() external payable {
         require(_hasDeposits(msg.sender), "EthPool: ZERO deposits");
-        (
-            uint256 totalDeposits,
-            uint256 totalRewards
-        ) = _getTotalDepositsAndRewards(msg.sender);
 
-        uint256 accountIndex = s_indexOf[msg.sender].index;
-        Account memory account = s_accounts[accountIndex];
+        (Account memory account, int256 accountIndex) = _getAccount(msg.sender);
+
+        uint256 totalDeposits = account.deposits;
+        uint256 totalRewards = account.rewards;
 
         account.deposits = 0;
         account.rewards = 0;
-        s_accounts[accountIndex] = account;
+
+        //uint256 accountIndex = s_indexOf[msg.sender].index;
+        s_accounts[uint256(accountIndex)] = account;
 
         s_totalEthDeposited -= totalDeposits;
+        s_totalRewards -= totalRewards;
 
         uint256 withdrawAmount = totalDeposits + totalRewards;
         (bool sent, ) = payable(msg.sender).call{value: withdrawAmount}("");
@@ -134,36 +132,18 @@ contract EthPool is Ownable {
         return true;
     }
 
-    /**
-     * @notice checks an account total deposits
-     */
-    function _getTotalDepositsAndRewards(address _account)
-        public
-        view
-        returns (uint256 totalDeposits, uint256 totalRewards)
-    {
-        if (!accountExists(_account)) {
-            return (totalDeposits, totalRewards);
-        }
-
-        uint256 accountIndex = s_indexOf[_account].index;
-        Account memory account = s_accounts[accountIndex];
-        totalDeposits = account.deposits;
-        totalRewards = account.rewards;
-    }
-
     function _getAccountReward(uint256 _reward, uint256 _totalDeposits)
         internal
         view
         returns (uint256)
     {
-        uint256 rewardPercentage = (_totalDeposits * 100) / s_totalEthDeposited;
+        uint256 poolShare = (_totalDeposits * 1e18) / s_totalEthDeposited;
 
-        return (rewardPercentage * _reward) / 100;
+        return (poolShare * _reward) / 1e18;
     }
 
     function getAccount(address _account)
-        external
+        public
         view
         returns (Account memory account)
     {
@@ -171,8 +151,13 @@ contract EthPool is Ownable {
             return account;
         }
 
-        uint256 accountIndex = s_indexOf[_account].index;
+        (account,) = _getAccount(_account);
+    }
+
+    function _getAccount(address _account) internal view returns (Account memory account, int256 index) {
+       uint256 accountIndex = s_indexOf[_account].index;
         account = s_accounts[accountIndex];
+        index = int256(accountIndex);
     }
 
     function accountExists(address _account) public view returns (bool) {
